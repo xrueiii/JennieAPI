@@ -37,12 +37,21 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 const dotenv = __importStar(require("dotenv"));
-// ✅ 載入 .env 設定（建議加到 .vscodeignore）
+// ✅ Load .env variables
 dotenv.config();
-// ✅ 使用環境變數（記得設定 .env）
-const url = process.env.AZURE_OPENAI_FULL_URL;
-const apiKey = process.env.AZURE_OPENAI_API_KEY;
+const url = "https://ai-wayneyang70211738ai298523890930.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview";
+const apiKey = "FqKvwsq0fsCLYAUG1HPCuxqa2sWoKgUpeBfYvQ2XGAsDJez6ME0uJQQJ99BCACHYHv6XJ3w3AAAAACOGTCQx";
+// ✅ Dynamic import of node-fetch for CommonJS compatibility
+const fetch = async (url, init) => {
+    const mod = await import('node-fetch');
+    return mod.default(url, init);
+};
+// ✅ Reusable function for calling Azure OpenAI
 async function generateResponse(prompt) {
+    if (!url || !apiKey) {
+        vscode.window.showErrorMessage("❌ Missing AZURE_OPENAI_FULL_URL or AZURE_OPENAI_API_KEY in .env");
+        return "Environment variables missing.";
+    }
     const headers = {
         "Content-Type": "application/json",
         "api-key": apiKey
@@ -51,7 +60,7 @@ async function generateResponse(prompt) {
         { role: "system", content: "You are a helpful assistant." },
         { role: "user", content: prompt }
     ];
-    const body = {
+    const requestBody = {
         messages,
         max_tokens: 100,
         temperature: 1,
@@ -61,67 +70,30 @@ async function generateResponse(prompt) {
         const response = await fetch(url, {
             method: "POST",
             headers,
-            body: JSON.stringify(body)
+            body: JSON.stringify(requestBody)
         });
-        if (response.ok) {
-            const data = await response.json();
-            console.log(data);
-            // if (data.choices?.[0]?.message?.content) {
-            // 	return data.choices[0].message.content;
-            // } else {
-            // 	console.warn("⚠️ Unexpected Azure response:", data);
-            // 	return "⚠️ No response received from Azure OpenAI.";
-            // }
-            return data;
+        const data = (await response.json());
+        if (!response.ok) {
+            vscode.window.showErrorMessage(`⚠️ Azure API Error: ${data.error?.message || 'Unknown error'}`);
+            return "API error.";
         }
+        const content = data.choices?.[0]?.message?.content;
+        return content || "⚠️ No message content.";
     }
     catch (err) {
         console.error("❌ Azure call failed:", err);
-        return "❌ Error occurred while calling Azure OpenAI.";
+        vscode.window.showErrorMessage("❌ Error calling Azure API: " + err.message);
+        return "❌ API call failed.";
     }
 }
 function activate(context) {
-    // ✅ 保留 WebView command
     const openWebviewCmd = vscode.commands.registerCommand('jennieapi.openWebview', () => {
         vscode.window.showInformationMessage('JennieAPI WebView UI 仍然存在喔！');
     });
     const testapiCmd = vscode.commands.registerCommand('jennieapi.testapiCmd', async () => {
-        const headers = {
-            "Content-Type": "application/json",
-            "api-key": apiKey
-        };
-        const messages = [
-            { role: "system", content: "You are a helpful assistant." },
-            { role: "user", content: "hi" }
-        ];
-        const body = {
-            messages,
-            max_tokens: 100,
-            temperature: 1,
-            top_p: 1
-        };
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers,
-                body: JSON.stringify(body)
-            });
-            const data = await response.json();
-            // console.log(data);
-            // vscode.window.showInformationMessage(String(data));
-            // if (data.choices?.[0]?.message?.content) {
-            //   return data.choices[0].message.content;
-            // } else {
-            //   console.warn("⚠️ Unexpected Azure response:", data);
-            //   return "⚠️ No response received from Azure OpenAI.";
-            // }
-        }
-        catch (err) {
-            console.error("❌ Azure call failed:", err);
-            return "❌ Error occurred while calling Azure OpenAI.";
-        }
+        const result = await generateResponse("hi");
+        vscode.window.showInformationMessage(result);
     });
-    // ✅ 插入 API 程式碼選單
     const insertApiCodeCmd = vscode.commands.registerCommand('jennieapi.insertApiCode', async () => {
         const apis = [
             {
