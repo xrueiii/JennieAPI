@@ -1,26 +1,60 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
+// 📁 src/extension.ts
 import * as vscode from 'vscode';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  // ✅ WebView command (if still needed)
+  const openWebviewCmd = vscode.commands.registerCommand('jennieapi.openWebview', () => {
+    vscode.window.showInformationMessage('JennieAPI WebView UI 仍然存在喔！');
+  });
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "jennieapi" is now active!');
+  // ✅ 新增：右鍵插入 API 程式碼
+  const insertApiCodeCmd = vscode.commands.registerCommand('jennieapi.insertApiCode', async () => {
+    const apis = [
+      {
+        label: '🔍 Azure OpenAI: Chat Completion',
+        description: 'POST /chat/completions with gpt-3.5-turbo',
+        snippet: `fetch("https://your-resource.openai.azure.com/openai/deployments/gpt35/chat/completions?api-version=2023-06-01-preview", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "api-key": "YOUR_API_KEY"
+  },
+  body: JSON.stringify({
+    messages: [
+      { role: "user", content: "Hello!" }
+    ],
+    temperature: 0.7
+  })
+})
+.then(res => res.json())
+.then(data => console.log(data));`
+      },
+      {
+        label: '📦 Sample: Get User by ID',
+        description: 'GET /users/:id 範例',
+        snippet: `fetch("https://api.example.com/users/123", {
+  method: "GET"
+})
+.then(res => res.json())
+.then(data => console.log(data));`
+      }
+    ];
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('jennieapi.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from JennieAPI!');
-	});
+    const pick = await vscode.window.showQuickPick(apis, {
+      placeHolder: '請選擇要插入的 API 程式碼'
+    });
 
-	context.subscriptions.push(disposable);
+    if (pick) {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        editor.edit(editBuilder => {
+          editBuilder.insert(editor.selection.active, pick.snippet);
+        });
+      }
+    }
+  });
+
+  context.subscriptions.push(openWebviewCmd, insertApiCodeCmd);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}

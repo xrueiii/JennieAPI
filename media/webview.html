@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>JennieAPI Connector</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+    h2 {
+      margin-bottom: 20px;
+      color: #007acc;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 6px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-family: monospace;
+      background-color: #fafafa;
+      transition: border 0.2s ease;
+    }
+    input:focus, textarea:focus {
+      border-color: #007acc;
+      outline: none;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #007acc;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      font-size: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    pre {
+      background: #f1f1f1;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      max-height: 300px;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+    .fade-in {
+      animation: fadeIn 0.4s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>🔌 JennieAPI Connector</h2>
+
+    <label>API URL</label>
+    <input id="url" placeholder="https://api.openai.com/v1/chat/completions" />
+
+    <label>Headers (JSON)</label>
+    <textarea id="headers" rows="4">{ "Authorization": "Bearer YOUR_API_KEY" }</textarea>
+
+    <label>Body (JSON)</label>
+    <textarea id="body" rows="6">{ "model": "gpt-3.5-turbo", "messages": [{ "role": "user", "content": "Hello" }] }</textarea>
+
+    <button id="sendBtn" onclick="sendRequest()">🚀 Send API Request</button>
+
+    <h3 style="margin-top: 30px;">📦 HTTP Status</h3>
+    <pre id="statusBox" class="fade-in">// Waiting for status...</pre>
+
+    <h3 style="margin-top: 30px;">🔍 Response</h3>
+    <pre id="response" class="fade-in">// Waiting for response...</pre>
+
+    <h3 style="margin-top: 30px;">🧩 Generated fetch Code</h3>
+    <pre id="codeBlock" class="fade-in">// Code snippet will appear here</pre>
+    <button onclick="copyCode()">📋 Copy</button>
+    <button onclick="sendCodeToVSCode()">📥 Insert to Current File</button>
+  </div>
+
+  <script>
+    async function sendRequest() {
+      const btn = document.getElementById('sendBtn');
+      const url = document.getElementById('url').value;
+      const headers = JSON.parse(document.getElementById('headers').value || '{}');
+      const body = JSON.parse(document.getElementById('body').value || '{}');
+      const responseBox = document.getElementById('response');
+      const statusBox = document.getElementById('statusBox');
+
+      btn.textContent = "⏳ Sending...";
+      btn.disabled = true;
+      responseBox.textContent = "// Waiting for response...";
+      statusBox.textContent = "// Waiting for status...";
+      responseBox.classList.remove("fade-in");
+      statusBox.classList.remove("fade-in");
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: headers,
+          body: JSON.stringify(body)
+        });
+
+        // 狀態顯示
+        statusBox.textContent = `${res.status} ${res.statusText}`;
+        statusBox.classList.add("fade-in");
+
+        // 判斷回傳格式
+        const contentType = res.headers.get("content-type") || "";
+        let result;
+
+        if (contentType.includes("application/json")) {
+          result = await res.json();
+        } else {
+          result = await res.text();
+        }
+
+        responseBox.textContent = typeof result === "string"
+          ? result
+          : JSON.stringify(result, null, 2);
+
+        // 產生 fetch code
+        const fetchCode = `fetch("${url}", {
+  method: "POST",
+  headers: ${JSON.stringify(headers, null, 2)},
+  body: JSON.stringify(${JSON.stringify(body, null, 2)})
+})
+.then(res => res.${contentType.includes("application/json") ? "json()" : "text()"}) 
+.then(data => console.log(data));`;
+
+        document.getElementById('codeBlock').textContent = fetchCode;
+
+      } catch (err) {
+        responseBox.textContent = `❌ Error:\n${err}`;
+        statusBox.textContent = `❌ Request failed`;
+      }
+
+      btn.textContent = "🚀 Send API Request";
+      btn.disabled = false;
+      responseBox.classList.add("fade-in");
+    }
+
+    function copyCode() {
+      const code = document.getElementById('codeBlock').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        alert("✅ Code copied to clipboard!");
+      });
+    }
+    
+    function sendCodeToVSCode() {
+      const vscode = acquireVsCodeApi();
+      const code = document.getElementById('codeBlock').textContent;
+      vscode.postMessage({ type: 'insertCode', payload: code });
+    }
+  </script>
+</body>
+</html>
