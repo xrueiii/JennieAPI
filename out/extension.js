@@ -35,14 +35,93 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
-// 📁 src/extension.ts
 const vscode = __importStar(require("vscode"));
+const dotenv = __importStar(require("dotenv"));
+// ✅ 載入 .env 設定（建議加到 .vscodeignore）
+dotenv.config();
+// ✅ 使用環境變數（記得設定 .env）
+const url = process.env.AZURE_OPENAI_FULL_URL;
+const apiKey = process.env.AZURE_OPENAI_API_KEY;
+async function generateResponse(prompt) {
+    const headers = {
+        "Content-Type": "application/json",
+        "api-key": apiKey
+    };
+    const messages = [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: prompt }
+    ];
+    const body = {
+        messages,
+        max_tokens: 100,
+        temperature: 1,
+        top_p: 1
+    };
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(body)
+        });
+        if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+            // if (data.choices?.[0]?.message?.content) {
+            // 	return data.choices[0].message.content;
+            // } else {
+            // 	console.warn("⚠️ Unexpected Azure response:", data);
+            // 	return "⚠️ No response received from Azure OpenAI.";
+            // }
+            return data;
+        }
+    }
+    catch (err) {
+        console.error("❌ Azure call failed:", err);
+        return "❌ Error occurred while calling Azure OpenAI.";
+    }
+}
 function activate(context) {
-    // ✅ WebView command (if still needed)
+    // ✅ 保留 WebView command
     const openWebviewCmd = vscode.commands.registerCommand('jennieapi.openWebview', () => {
         vscode.window.showInformationMessage('JennieAPI WebView UI 仍然存在喔！');
     });
-    // ✅ 新增：右鍵插入 API 程式碼
+    const testapiCmd = vscode.commands.registerCommand('jennieapi.testapiCmd', async () => {
+        const headers = {
+            "Content-Type": "application/json",
+            "api-key": apiKey
+        };
+        const messages = [
+            { role: "system", content: "You are a helpful assistant." },
+            { role: "user", content: "hi" }
+        ];
+        const body = {
+            messages,
+            max_tokens: 100,
+            temperature: 1,
+            top_p: 1
+        };
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers,
+                body: JSON.stringify(body)
+            });
+            const data = await response.json();
+            // console.log(data);
+            // vscode.window.showInformationMessage(String(data));
+            // if (data.choices?.[0]?.message?.content) {
+            //   return data.choices[0].message.content;
+            // } else {
+            //   console.warn("⚠️ Unexpected Azure response:", data);
+            //   return "⚠️ No response received from Azure OpenAI.";
+            // }
+        }
+        catch (err) {
+            console.error("❌ Azure call failed:", err);
+            return "❌ Error occurred while calling Azure OpenAI.";
+        }
+    });
+    // ✅ 插入 API 程式碼選單
     const insertApiCodeCmd = vscode.commands.registerCommand('jennieapi.insertApiCode', async () => {
         const apis = [
             {
@@ -86,7 +165,7 @@ function activate(context) {
             }
         }
     });
-    context.subscriptions.push(openWebviewCmd, insertApiCodeCmd);
+    context.subscriptions.push(openWebviewCmd, insertApiCodeCmd, testapiCmd);
 }
 function deactivate() { }
 //# sourceMappingURL=extension.js.map
