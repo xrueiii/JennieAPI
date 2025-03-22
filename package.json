@@ -9,15 +9,36 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:jennieapi.helloWorld",
+    "onCommand:jennieapi.openWebview",
+    "onCommand:jennieapi.insertApiCode"
+  ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
         "command": "jennieapi.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "jennieapi.openWebview",
+        "title": "JennieAPI: Open API Connector"
+      },
+      {
+        "command": "jennieapi.insertApiCode",
+        "title": "JennieAPI: 插入 API 程式碼"
       }
-    ]
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "jennieapi.insertApiCode",
+          "when": "editorTextFocus",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
