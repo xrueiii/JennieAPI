@@ -35,14 +35,65 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
-// 📁 src/extension.ts
 const vscode = __importStar(require("vscode"));
+const dotenv = __importStar(require("dotenv"));
+// ✅ Load .env variables
+dotenv.config();
+const url = "https://ai-wayneyang70211738ai298523890930.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview";
+const apiKey = "FqKvwsq0fsCLYAUG1HPCuxqa2sWoKgUpeBfYvQ2XGAsDJez6ME0uJQQJ99BCACHYHv6XJ3w3AAAAACOGTCQx";
+// ✅ Dynamic import of node-fetch for CommonJS compatibility
+const fetch = async (url, init) => {
+    const mod = await import('node-fetch');
+    return mod.default(url, init);
+};
+// ✅ Reusable function for calling Azure OpenAI
+async function generateResponse(prompt) {
+    if (!url || !apiKey) {
+        vscode.window.showErrorMessage("❌ Missing AZURE_OPENAI_FULL_URL or AZURE_OPENAI_API_KEY in .env");
+        return "Environment variables missing.";
+    }
+    const headers = {
+        "Content-Type": "application/json",
+        "api-key": apiKey
+    };
+    const messages = [
+        { role: "system", content: "You are a helpful assistant." },
+        { role: "user", content: prompt }
+    ];
+    const requestBody = {
+        messages,
+        max_tokens: 100,
+        temperature: 1,
+        top_p: 1
+    };
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers,
+            body: JSON.stringify(requestBody)
+        });
+        const data = (await response.json());
+        if (!response.ok) {
+            vscode.window.showErrorMessage(`⚠️ Azure API Error: ${data.error?.message || 'Unknown error'}`);
+            return "API error.";
+        }
+        const content = data.choices?.[0]?.message?.content;
+        return content || "⚠️ No message content.";
+    }
+    catch (err) {
+        console.error("❌ Azure call failed:", err);
+        vscode.window.showErrorMessage("❌ Error calling Azure API: " + err.message);
+        return "❌ API call failed.";
+    }
+}
 function activate(context) {
-    // ✅ WebView command (if still needed)
     const openWebviewCmd = vscode.commands.registerCommand('jennieapi.openWebview', () => {
         vscode.window.showInformationMessage('JennieAPI WebView UI 仍然存在喔！');
     });
-    // ✅ 新增：右鍵插入 API 程式碼
+    const testapiCmd = vscode.commands.registerCommand('jennieapi.testapiCmd', async () => {
+        const result = await generateResponse("hi");
+        vscode.window.showInformationMessage(result);
+    });
     const insertApiCodeCmd = vscode.commands.registerCommand('jennieapi.insertApiCode', async () => {
         const apis = [
             {
@@ -86,7 +137,7 @@ function activate(context) {
             }
         }
     });
-    context.subscriptions.push(openWebviewCmd, insertApiCodeCmd);
+    context.subscriptions.push(openWebviewCmd, insertApiCodeCmd, testapiCmd);
 }
 function deactivate() { }
 //# sourceMappingURL=extension.js.map
