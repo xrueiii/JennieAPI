@@ -1,8 +1,9 @@
-import * as dotenv from "dotenv";
-import * as fs from "fs";
-import type { RequestInit as NodeFetchRequestInit } from "node-fetch";
-import * as path from "path";
-import * as vscode from "vscode";
+import * as vscode from 'vscode';
+import * as dotenv from 'dotenv';
+import type { RequestInit as NodeFetchRequestInit } from 'node-fetch';
+import * as fs from 'fs';
+import * as path from 'path';
+import { SnippetString } from 'vscode'; // 在最上方補這行
 
 // ✅ Load .env variables
 dotenv.config();
@@ -11,7 +12,6 @@ type Message = {
   role: "system" | "user" | "assistant";
   content: string;
 };
-type HttpMethod = "get" | "post" | "put" | "delete" | "patch";
 
 // Enhanced API Documentation interface
 interface ApiDoc {
@@ -32,8 +32,8 @@ interface ApiDoc {
       delete?: ApiEndpoint;
       patch?: ApiEndpoint;
       description?: string;
-    };
-  };
+    }
+  }
 }
 
 interface ApiEndpoint {
@@ -45,56 +45,50 @@ interface ApiEndpoint {
   parameters?: any[];
 }
 
-const url =
-  "https://ai-wayneyang70211738ai298523890930.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview";
-const apiKey =
-  "FqKvwsq0fsCLYAUG1HPCuxqa2sWoKgUpeBfYvQ2XGAsDJez6ME0uJQQJ99BCACHYHv6XJ3w3AAAAACOGTCQx";
+const url = "https://ai-wayneyang70211738ai298523890930.openai.azure.com/openai/deployments/gpt-4o/chat/completions?api-version=2025-01-01-preview";
+const apiKey = "FqKvwsq0fsCLYAUG1HPCuxqa2sWoKgUpeBfYvQ2XGAsDJez6ME0uJQQJ99BCACHYHv6XJ3w3AAAAACOGTCQx";
 
 // ✅ Dynamic import of node-fetch for CommonJS compatibility
 const fetch = async (url: string, init?: NodeFetchRequestInit) => {
-  const mod = await import("node-fetch");
+  const mod = await import('node-fetch');
   return mod.default(url, init);
 };
 
 // ✅ Reusable function for calling Azure OpenAI
 async function generateResponse(prompt: string): Promise<string> {
   if (!url || !apiKey) {
-    vscode.window.showErrorMessage(
-      "❌ Missing AZURE_OPENAI_FULL_URL or AZURE_OPENAI_API_KEY in .env"
-    );
+    vscode.window.showErrorMessage("❌ Missing AZURE_OPENAI_FULL_URL or AZURE_OPENAI_API_KEY in .env");
     return "Environment variables missing.";
   }
 
   const headers = {
     "Content-Type": "application/json",
-    "api-key": apiKey,
+    "api-key": apiKey
   };
 
   const messages: Message[] = [
     { role: "system", content: "You are a helpful assistant." },
-    { role: "user", content: prompt },
+    { role: "user", content: prompt }
   ];
 
   const requestBody = {
     messages,
-    max_tokens: 100,
+    max_tokens: 300,
     temperature: 1,
-    top_p: 1,
+    top_p: 1
   };
 
   try {
     const response = await fetch(url, {
       method: "POST",
       headers,
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(requestBody)
     });
 
     const data = (await response.json()) as any;
 
     if (!response.ok) {
-      vscode.window.showErrorMessage(
-        `⚠️ Azure API Error: ${data.error?.message || "Unknown error"}`
-      );
+      vscode.window.showErrorMessage(`⚠️ Azure API Error: ${data.error?.message || 'Unknown error'}`);
       return "API error.";
     }
 
@@ -102,9 +96,7 @@ async function generateResponse(prompt: string): Promise<string> {
     return content || "⚠️ No message content.";
   } catch (err: any) {
     console.error("❌ Azure call failed:", err);
-    vscode.window.showErrorMessage(
-      "❌ Error calling Azure API: " + err.message
-    );
+    vscode.window.showErrorMessage("❌ Error calling Azure API: " + err.message);
     return "❌ API call failed.";
   }
 }
@@ -124,14 +116,9 @@ async function readApiDocs(): Promise<ApiDoc | null> {
   }
 
   // Try multiple possible filenames for API docs
-  const possibleFiles = [
-    "api.json",
-    "openapi.json",
-    "swagger.json",
-    "api-docs.json",
-  ];
-  let apiDocPath = "";
-
+  const possibleFiles = ['api.json', 'openapi.json', 'swagger.json', 'api-docs.json'];
+  let apiDocPath = '';
+  
   for (const filename of possibleFiles) {
     const testPath = path.join(workspaceFolders[0].uri.fsPath, filename);
     if (fs.existsSync(testPath)) {
@@ -141,15 +128,12 @@ async function readApiDocs(): Promise<ApiDoc | null> {
   }
 
   if (!apiDocPath) {
-    vscode.window.showErrorMessage(
-      "API documentation file not found. Looked for: " +
-        possibleFiles.join(", ")
-    );
+    vscode.window.showErrorMessage("API documentation file not found. Looked for: " + possibleFiles.join(', '));
     return null;
   }
 
   try {
-    const fileContent = fs.readFileSync(apiDocPath, "utf-8");
+    const fileContent = fs.readFileSync(apiDocPath, 'utf-8');
     apiDocsCache = JSON.parse(fileContent) as ApiDoc;
     return apiDocsCache;
   } catch (error) {
@@ -170,53 +154,27 @@ async function getApiPaths(): Promise<string[]> {
 // Enhance keyword extraction with NLP-like techniques
 function extractKeywords(text: string): string[] {
   // Remove common syntax elements
-  const cleanLine = text.replace(/[(){};=]/g, " ");
-
+  const cleanLine = text.replace(/[(){};=]/g, ' ');
+  
   // Split into words
-  const words = cleanLine
-    .split(/\s+/)
-    .filter((word) => word.length > 2) // Filter out very short words
-    .filter((word) => !/^[0-9]+$/.test(word)) // Filter out numbers
-    .map((word) => word.toLowerCase())
-    .filter((word) => !isStopWord(word));
-
+  const words = cleanLine.split(/\s+/)
+    .filter(word => word.length > 2)  // Filter out very short words
+    .filter(word => !/^[0-9]+$/.test(word))  // Filter out numbers
+    .map(word => word.toLowerCase())
+    .filter(word => !isStopWord(word));
+  
   // Extract potential entities and noun phrases
   const entities = extractEntities(text);
-
+  
   return [...new Set([...words, ...entities])];
 }
 
 // Simple stop words filter
 function isStopWord(word: string): boolean {
   const stopWords = new Set([
-    "const",
-    "let",
-    "var",
-    "function",
-    "async",
-    "await",
-    "return",
-    "import",
-    "export",
-    "from",
-    "require",
-    "module",
-    "this",
-    "class",
-    "interface",
-    "type",
-    "enum",
-    "true",
-    "false",
-    "null",
-    "undefined",
-    "new",
-    "try",
-    "catch",
-    "if",
-    "else",
-    "for",
-    "while",
+    'const', 'let', 'var', 'function', 'async', 'await', 'return', 'import', 'export',
+    'from', 'require', 'module', 'this', 'class', 'interface', 'type', 'enum',
+    'true', 'false', 'null', 'undefined', 'new', 'try', 'catch', 'if', 'else', 'for', 'while'
   ]);
   return stopWords.has(word);
 }
@@ -224,171 +182,148 @@ function isStopWord(word: string): boolean {
 // Extract potential entities (camelCase, PascalCase, snake_case, etc.)
 function extractEntities(text: string): string[] {
   const entities: string[] = [];
-
+  
   // Extract camelCase or PascalCase words
   const camelCaseRegex = /([A-Z]?[a-z]+)(?=[A-Z])/g;
   let match;
   while ((match = camelCaseRegex.exec(text)) !== null) {
     entities.push(match[1].toLowerCase());
   }
-
+  
   // Extract words from snake_case
-  const snakeCaseWords = text.split("_").filter((word) => word.length > 2);
-  entities.push(...snakeCaseWords.map((word) => word.toLowerCase()));
-
+  const snakeCaseWords = text.split('_').filter(word => word.length > 2);
+  entities.push(...snakeCaseWords.map(word => word.toLowerCase()));
+  
   // Extract words from kebab-case
-  const kebabCaseWords = text.split("-").filter((word) => word.length > 2);
-  entities.push(...kebabCaseWords.map((word) => word.toLowerCase()));
-
+  const kebabCaseWords = text.split('-').filter(word => word.length > 2);
+  entities.push(...kebabCaseWords.map(word => word.toLowerCase()));
+  
   return [...new Set(entities)];
 }
 
 // Enhanced function to calculate similarity between text and API using cosine similarity
-function calculateCosineSimilarity(
-  keywords: string[],
-  apiText: string
-): number {
+function calculateCosineSimilarity(keywords: string[], apiText: string): number {
   // Tokenize API text
-  const apiTokens = apiText
-    .toLowerCase()
-    .split(/\W+/)
-    .filter((word) => word.length > 2 && !isStopWord(word));
-
+  const apiTokens = apiText.toLowerCase().split(/\W+/).filter(word => 
+    word.length > 2 && !isStopWord(word)
+  );
+  
   // Create term frequency maps
   const keywordsMap: Map<string, number> = new Map();
   const apiMap: Map<string, number> = new Map();
-
+  
   // Fill keyword frequency map
-  keywords.forEach((keyword) => {
+  keywords.forEach(keyword => {
     keywordsMap.set(keyword, (keywordsMap.get(keyword) || 0) + 1);
   });
-
+  
   // Fill API text frequency map
-  apiTokens.forEach((token) => {
+  apiTokens.forEach(token => {
     apiMap.set(token, (apiMap.get(token) || 0) + 1);
   });
-
+  
   // Get all unique terms
   const allTerms = new Set([...keywordsMap.keys(), ...apiMap.keys()]);
-
+  
   // Calculate dot product and magnitudes
   let dotProduct = 0;
   let keywordsMagnitude = 0;
   let apiMagnitude = 0;
-
-  allTerms.forEach((term) => {
+  
+  allTerms.forEach(term => {
     const keywordFreq = keywordsMap.get(term) || 0;
     const apiFreq = apiMap.get(term) || 0;
-
+    
     dotProduct += keywordFreq * apiFreq;
     keywordsMagnitude += keywordFreq * keywordFreq;
     apiMagnitude += apiFreq * apiFreq;
   });
-
+  
   // Calculate cosine similarity
   keywordsMagnitude = Math.sqrt(keywordsMagnitude);
   apiMagnitude = Math.sqrt(apiMagnitude);
-
+  
   if (keywordsMagnitude === 0 || apiMagnitude === 0) {
     return 0;
   }
-
+  
   return dotProduct / (keywordsMagnitude * apiMagnitude);
 }
 
 // Enhanced function to find relevant APIs using cosine similarity
-async function findRelevantApis(
-  currentCode: string,
-  lineNumber: number
-): Promise<
-  { path: string; method: string; description: string; similarity: number }[]
-> {
+async function findRelevantApis(currentCode: string, lineNumber: number): Promise<{path: string, method: string, description: string, similarity: number}[]> {
   const apiDocs = await readApiDocs();
   if (!apiDocs) {
     return [];
   }
-
+  
   // Extract context from surrounding code (not just the current line)
   const document = vscode.window.activeTextEditor?.document;
   if (!document) {
     return [];
   }
-
+  
   // Get a window of code around the current line for context
   const startLine = Math.max(0, lineNumber - 5);
   const endLine = Math.min(document.lineCount - 1, lineNumber + 5);
-
-  let contextCode = "";
+  
+  let contextCode = '';
   for (let i = startLine; i <= endLine; i++) {
-    contextCode += document.lineAt(i).text + " ";
+    contextCode += document.lineAt(i).text + ' ';
   }
-
+  
   // Extract keywords from both current line and context
   const currentLineText = document.lineAt(lineNumber).text;
   const currentLineKeywords = extractKeywords(currentLineText);
   const contextKeywords = extractKeywords(contextCode);
-
+  
   // Combine with higher weight for current line keywords
-  const combinedKeywords = [
-    ...currentLineKeywords,
-    ...currentLineKeywords,
-    ...contextKeywords,
-  ];
-
+  const combinedKeywords = [...currentLineKeywords, ...currentLineKeywords, ...contextKeywords];
+  
   // Match keywords against API paths and descriptions
-  const matches: {
-    path: string;
-    method: string;
-    description: string;
-    similarity: number;
-  }[] = [];
-
+  const matches: {path: string, method: string, description: string, similarity: number}[] = [];
+  
   for (const [path, pathInfo] of Object.entries(apiDocs.paths)) {
-    const methods = ["get", "post", "put", "delete", "patch"];
-
+    const methods = ['get', 'post', 'put', 'delete', 'patch'];
+    
     for (const method of methods) {
-      const endpoint = pathInfo[method as keyof typeof pathInfo] as
-        | ApiEndpoint
-        | undefined;
+      const endpoint = pathInfo[method as keyof typeof pathInfo] as ApiEndpoint | undefined;
       if (!endpoint) {
         continue;
       }
-
+      
       // Build a rich text representation of this API endpoint
       const apiText = [
         path,
         method,
-        endpoint.summary || "",
-        endpoint.description || "",
-        endpoint.operationId || "",
+        endpoint.summary || '',
+        endpoint.description || '',
+        endpoint.operationId || '',
         // Include any parameter names
-        ...(endpoint.parameters || []).map((p: any) => p.name || ""),
+        ...(endpoint.parameters || []).map((p: any) => p.name || ''),
         // Include any request body properties if available
-        ...(endpoint.requestBody?.content
-          ? Object.keys(endpoint.requestBody.content).map(
-              (contentType) => contentType
-            )
-          : []),
-      ].join(" ");
-
+        ...(endpoint.requestBody?.content ? 
+            Object.keys(endpoint.requestBody.content).map(contentType => contentType) : []),
+      ].join(' ');
+      
       // Calculate similarity between keywords and API text
       const similarity = calculateCosineSimilarity(combinedKeywords, apiText);
-
-      if (similarity > 0) { // threshold to consider it a match
+      
+      if (similarity > 0.1) { // threshold to consider it a match
         matches.push({
           path,
           method,
           description: endpoint.summary || path,
-          similarity,
+          similarity
         });
       }
     }
   }
-
+  
   // Sort by similarity score and return top matches
   return matches
     .sort((a, b) => b.similarity - a.similarity)
-    .slice(0, 3);
+    .slice(0, 5);
 }
 
 // Use LLM to determine if the current code is attempting to make an API call
@@ -415,18 +350,18 @@ async function isApiFetchIntent(code: string): Promise<boolean> {
     /\/\/ get .* data/i,
     /\/\/ fetch/i,
     /\/\/ call api/i,
-    /\/\/ send/i,
+    /\/\/ send/i
   ];
-
+  
   // Check for common patterns first
-  if (fetchPatterns.some((pattern) => pattern.test(code))) {
+  if (fetchPatterns.some(pattern => pattern.test(code))) {
     return true;
   }
-
+  
   // For more complex cases or comments, we could use the LLM
   // This is commented out to avoid unnecessary API calls, but can be enabled
   // for more sophisticated detection
-
+  
   /*
   // Ask LLM if this code is intending to fetch data
   const prompt = `Given this code snippet:
@@ -445,138 +380,89 @@ async function isApiFetchIntent(code: string): Promise<boolean> {
     return fetchPatterns.some(pattern => pattern.test(code));
   }
   */
-
+  
   return false;
 }
 
 // Function to generate fetch code for a specific API
-async function generateFetchCodeForApi(
-  apiPath: string,
-  method: string = "get"
-): Promise<string> {
+async function generateFetchCodeForApi(apiPath: string, method: string = 'get'): Promise<SnippetString> {
   const apiDocs = await readApiDocs();
   if (!apiDocs || !apiDocs.paths[apiPath]) {
-    return generateDefaultFetchCode(apiPath, method);
+    return new SnippetString(generateDefaultFetchCode(apiPath, method).trim());
   }
+  
+  const pathInfo = apiDocs?.paths[apiPath];
+  const endpoint = pathInfo?.[method as keyof typeof pathInfo] as ApiEndpoint | undefined;
 
-  const pathInfo = apiDocs.paths[apiPath];
-  const endpoint = pathInfo[method as keyof typeof pathInfo] as
-    | ApiEndpoint
-    | undefined;
+  let snippetCode = '';
+  let i = 1;
 
-  // Determine content type and build request body if needed
-  let contentType = "application/json";
-  let requestBodyCode = "";
+  // 預設為 application/json
+  const contentType = endpoint?.requestBody?.content?.['application/json'] ? 'application/json' : 'application/json';
 
-  if (endpoint?.requestBody?.content) {
-    const contentTypes = Object.keys(endpoint.requestBody.content);
-    if (contentTypes.includes("multipart/form-data")) {
-      contentType = "multipart/form-data";
+  // 如果是 POST/PUT 等含 body 的方法
+  if (['post', 'put', 'patch'].includes(method)) {
+    const schema = endpoint?.requestBody?.content?.['application/json']?.schema;
+    let bodyProps = '';
 
-      // Generate form data code for multipart requests
-      requestBodyCode = `
-    // Create form data for multipart request
-    const formData = new FormData();
-    
-    // TODO: Add your form fields here
-    // Example: formData.append('fieldName', fieldValue);
-    
-    // For file uploads
-    // formData.append('file', fileInput.files[0]);`;
-    } else if (contentTypes.includes("application/json")) {
-      contentType = "application/json";
-
-      // Get JSON schema if available and generate stub
-      let jsonSchema = endpoint.requestBody.content["application/json"].schema;
-      if (jsonSchema) {
-        requestBodyCode = `
-    // Request body
-    const requestBody = {
-      // TODO: Fill in required properties
-      /* ${JSON.stringify(jsonSchema, null, 2)} */
-    };`;
-      } else {
-        requestBodyCode = `
-    // Request body
-    const requestBody = {
-      // TODO: Fill in required properties
-    };`;
+    if (schema && schema.properties) {
+      for (const key of Object.keys(schema.properties)) {
+        bodyProps += `${key}: \${${i++}:${key}},\n`;
       }
-    }
-  }
-
-  // Generate appropriate code based on method and content type
-  if (method === "get" || method === "delete") {
-    return `
-try {
-    const response = await this.${method}('${apiPath}', {
-        headers: {
-            'Content-Type': '${contentType}'
-        }
-    });
-
-    if (response.status === 200) {
-        return response.data;
     } else {
-        console.error('Error fetching data: ', response);
-        return null;
+      bodyProps = `/* TODO: add body properties */`;
     }
-} catch (error) {
-    console.error('Error fetching data: ', error);
+
+    snippetCode = `
+try {
+  const requestBody = {
+    ${bodyProps}
+  };
+
+  const response = await this.${method}('${apiPath}', requestBody, {
+    headers: {
+      'Content-Type': '${contentType}'
+    }
+  });
+
+  if (response.status === 200 || response.status === 201) {
+    return response.data;
+  } else {
+    console.error('Error:', response);
     return null;
+  }
+} catch (error) {
+  console.error('Exception:', error);
+  return null;
 }`;
   } else {
-    // For POST, PUT, PATCH
-    if (contentType === "multipart/form-data") {
-      return `
-try {${requestBodyCode}
-    
-    const response = await this.${method}('${apiPath}', formData, {
-        headers: {
-            'Content-Type': '${contentType}'
-        }
-    });
+    // GET/DELETE 無 body
+    snippetCode = `
+try {
+  const response = await this.${method}('${apiPath}', {
+    headers: {
+      'Content-Type': '${contentType}'
+    }
+  });
 
-    if (response.status === 200 || response.status === 201) {
-        return response.data;
-    } else {
-        console.error('Error submitting data: ', response);
-        return null;
-    }
-} catch (error) {
-    console.error('Error submitting data: ', error);
+  if (response.status === 200) {
+    return response.data;
+  } else {
+    console.error('Error:', response);
     return null;
-}`;
-    } else {
-      return `
-try {${requestBodyCode}
-    
-    const response = await this.${method}('${apiPath}', requestBody, {
-        headers: {
-            'Content-Type': '${contentType}'
-        }
-    });
-
-    if (response.status === 200 || response.status === 201) {
-        return response.data;
-    } else {
-        console.error('Error submitting data: ', response);
-        return null;
-    }
-} catch (error) {
-    console.error('Error submitting data: ', error);
-    return null;
-}`;
-    }
   }
+} catch (error) {
+  console.error('Exception:', error);
+  return null;
+}`;
+  }
+
+  return new SnippetString(snippetCode.trim());
 }
 
 // Function to generate default fetch code for an API
-function generateDefaultFetchCode(
-  apiPath: string,
-  method: string = "get"
-): string {
-  if (method === "get" || method === "delete") {
+function generateDefaultFetchCode(apiPath: string, method: string = 'get'): string {
+  if (method === 'get' || method === 'delete') {
     return `
 try {
     const response = await this.${method}('${apiPath}', {
@@ -622,447 +508,194 @@ try {
   }
 }
 
-function normalizePath(base: string, sub: string): string {
-  const baseFixed = base.endsWith("/") ? base.slice(0, -1) : base;
-  const subFixed = sub.startsWith("/") ? sub : "/" + sub;
-  return baseFixed + subFixed;
-}
-
-function ensurePathMethod(
-  doc: ApiDoc,
-  path: string,
-  method: HttpMethod
-): ApiEndpoint {
-  if (!doc.paths[path]) {
-    doc.paths[path] = {};
-  }
-
-  if (!doc.paths[path][method]) {
-    const opId = `${method}_${path.replace(/[\/{}]/g, "_").replace(/^_/, "")}`;
-    doc.paths[path][method] = {
-      summary: `${method.toUpperCase()} ${path}`,
-      description: `Handles HTTP ${method.toUpperCase()} request for ${path}`,
-      operationId: opId,
-      parameters: [],
-      responses: {
-        "200": {
-          description: "OK",
-        },
-      },
-    };
-  }
-
-  return doc.paths[path][method]!;
-}
-
-function toSentenceCase(camelCase: string): string {
-  // e.g. "getAllContests" → "Get all contests"
-  const result = camelCase.replace(/([A-Z])/g, " $1").toLowerCase();
-  return result.charAt(0).toUpperCase() + result.slice(1);
-}
-
-function parseTypeScriptControllerToApiDoc(text: string): ApiDoc {
-  const lines = text.split("\n");
-  const apiDoc: ApiDoc = {
-    openapi: "3.0.0",
-    info: {
-      title: "API Documentation",
-      description: "Generated from TypeScript Controller",
-      version: "1.0.0",
-    },
-    servers: [{ url: "http://localhost:3000" }],
-    paths: {},
-  };
-
-  const decoratorRegex =
-    /@(Get|Post|Put|Delete|Patch)\(["'`]?(\/[^"'`]*)["'`]?\)/;
-  const methodRegex = /(async\s+)?(\w+)\s*\(.*\)\s*{/;
-
-  let currentPath = "";
-  let currentMethod: HttpMethod = "get";
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    const decoratorMatch = line.match(decoratorRegex);
-    if (decoratorMatch) {
-      currentMethod = decoratorMatch[1].toLowerCase() as HttpMethod;
-      currentPath = decoratorMatch[2];
-    }
-
-    const methodMatch = line.match(methodRegex);
-    if (methodMatch && currentPath) {
-      const methodName = methodMatch[2];
-      const endpoint = ensurePathMethod(apiDoc, currentPath, currentMethod);
-
-      endpoint.summary = toSentenceCase(methodName);
-      endpoint.description = `Handles ${currentMethod.toUpperCase()} for ${currentPath}`;
-
-      currentPath = ""; // reset after use
-    }
-  }
-
-  return apiDoc;
-}
-
-function parseJavaControllerToApiDoc(text: string): ApiDoc {
-  const lines = text.split("\n");
-  const apiDoc: ApiDoc = {
-    openapi: "3.0.0",
-    info: {
-      title: "API Documentation",
-      description: "Generated from Java Controller",
-      version: "1.0.0",
-    },
-    servers: [{ url: "http://localhost:8080" }],
-    paths: {},
-  };
-
-  const requestMappingRegex = /@RequestMapping\("([^"]+)"\)/;
-  const methodRegex =
-    /@(GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)(\(([^)]*)\))?/;
-  const methodNameRegex = /(public|private|protected)\s+\w+\s+(\w+)\s*\(/;
-  const pathParamRegex = /@PathVariable\s+(\w+\s)?(\w+)/g;
-  const reqParamRegex = /@RequestParam\("([^"]+)"\)/g;
-  const requestBodyRegex = /@RequestBody\s+(\w+\s)?(\w+)/;
-
-  let basePath = "";
-  let pendingComment = ""; // Store last Javadoc comment block
-
-  for (const line of lines) {
-    const match = line.match(requestMappingRegex);
-    if (match) {
-      basePath = match[1];
-      break;
-    }
-  }
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    // Capture Javadoc comment
-    if (line.startsWith("/**")) {
-      pendingComment = line.replace("/**", "").trim();
-      for (let j = i + 1; j < lines.length; j++) {
-        const commentLine = lines[j].trim();
-        if (commentLine.startsWith("*/")) {
-          break;
-        }
-        pendingComment += " " + commentLine.replace("*", "").trim();
-        i = j;
+export function activate(context: vscode.ExtensionContext) {
+  const openWebviewCmd = vscode.commands.registerCommand('jennieapi.openWebview', () => {
+    const panel = vscode.window.createWebviewPanel(
+      'jennieWebview',
+      'Jennie WebView',
+      vscode.ViewColumn.One,
+      {
+        enableScripts: true
       }
-    }
+    );
 
-    const methodMatch = line.match(methodRegex);
-    if (methodMatch) {
-      const currentMethod = methodMatch[1].toLowerCase() as HttpMethod;
-      const pathMatch = methodMatch[3]?.match(/"([^"]+)"/);
-      const currentPath = pathMatch ? pathMatch[1] : "";
-      const fullPath = normalizePath(basePath, currentPath);
+    // 取得 HTML 檔案路徑
+    const htmlPath = path.join(context.extensionPath, 'media', 'webview.html');
 
-      // Extract method name
-      let methodName = "unnamedMethod";
-      for (let k = i; k < i + 5; k++) {
-        const methodNameMatch = lines[k]?.match(methodNameRegex);
-        if (methodNameMatch) {
-          methodName = methodNameMatch[2];
-          break;
-        }
-      }
+    // 讀取 HTML 檔案內容
+    const htmlContent = fs.readFileSync(htmlPath, 'utf8');
 
-      const endpoint = ensurePathMethod(apiDoc, fullPath, currentMethod);
-
-      endpoint.summary = toSentenceCase(methodName);
-      endpoint.description =
-        pendingComment ||
-        `Handles ${currentMethod.toUpperCase()} for ${fullPath}`;
-
-      pendingComment = ""; // reset comment after use
-
-      const seenParams = new Set<string>();
-
-      for (let j = i; j < Math.min(i + 10, lines.length); j++) {
-        const methodLine = lines[j];
-
-        let match;
-
-        while ((match = pathParamRegex.exec(methodLine)) !== null) {
-          const paramName = match[2];
-          if (!seenParams.has(paramName)) {
-            endpoint.parameters!.push({
-              name: paramName,
-              in: "path",
-              required: true,
-              schema: { type: "string" },
-            });
-            seenParams.add(paramName);
-          }
-        }
-
-        while ((match = reqParamRegex.exec(methodLine)) !== null) {
-          const paramName = match[1];
-          if (!seenParams.has(paramName)) {
-            endpoint.parameters!.push({
-              name: paramName,
-              in: "query",
-              required: false,
-              schema: { type: "string" },
-            });
-            seenParams.add(paramName);
-          }
-        }
-
-        const bodyMatch = methodLine.match(requestBodyRegex);
-        if (bodyMatch) {
-          endpoint.requestBody = {
-            required: true,
-            content: {
-              "application/json": {
-                schema: {
-                  type: "object",
-                  description: `Payload for ${methodName}`,
-                },
-              },
-            },
-          };
-        }
-      }
-    }
-  }
-
-  return apiDoc;
-}
-
-function getAllSourceFiles(dir: string): string[] {
-  let results: string[] = [];
-
-  fs.readdirSync(dir).forEach((file) => {
-    const filePath = path.join(dir, file);
-    const stat = fs.statSync(filePath);
-
-    if (stat && stat.isDirectory()) {
-      results = results.concat(getAllSourceFiles(filePath));
-    } else if (filePath.endsWith(".java") || filePath.endsWith(".ts")) {
-      results.push(filePath);
-    }
+    // 設定 Webview HTML
+    panel.webview.html = htmlContent;
+    vscode.window.showInformationMessage('JennieAPI WebView UI 仍然存在喔！');
   });
 
-  return results;
-}
+  const testapiCmd = vscode.commands.registerCommand('jennieapi.testapiCmd', async () => {
+    const result = await generateResponse("hi");
+    vscode.window.showInformationMessage(result);
+  });
 
-export function activate(context: vscode.ExtensionContext) {
-  const generateApiJsonFromFolder = vscode.commands.registerCommand(
-    "jennieapi.generateApiJson",
-    async (uri: vscode.Uri) => {
-      const folderPath = uri?.fsPath;
-      vscode.window.showInformationMessage(
-        `✅ Command triggered for: ${uri?.fsPath}`
-      );
+  // // Function to generate fetch code via command
+  // async function generateFetchCode() {
+  //   const apis = await getApiPaths();
+  //   if (apis.length === 0) {
+  //       return;
+  //   }
 
-      if (!folderPath) {
-        vscode.window.showErrorMessage(
-          "❌ 請從 Explorer 選擇一個資料夾來產生 API 文件。"
-        );
-        return;
-      }
+  //   const selectedApi = await vscode.window.showQuickPick(apis, { placeHolder: 'Select an API' });
+  //   if (!selectedApi) {
+  //       return;
+  //   }
 
-      vscode.window.showInformationMessage(`📁 開始掃描資料夾：${folderPath}`);
+  //   // Get methods available for this API
+  //   const apiDocs = await readApiDocs();
+  //   const pathInfo = apiDocs?.paths[selectedApi];
+    
+  //   if (!pathInfo) {
+  //     vscode.window.showErrorMessage("API path info not found");
+  //     return;
+  //   }
+    
+  //   // Find available methods for this endpoint
+  //   const methods = ['get', 'post', 'put', 'delete', 'patch']
+  //     .filter(method => pathInfo[method as keyof typeof pathInfo]);
+    
+  //   // If no methods found, default to GET
+  //   if (methods.length === 0) {
+  //     methods.push('get');
+  //   }
+    
+  //   // If only one method, use it directly
+  //   let selectedMethod = methods[0];
+    
+  //   // If multiple methods, let user choose
+  //   if (methods.length > 1) {
+  //     selectedMethod = await vscode.window.showQuickPick(methods, { 
+  //       placeHolder: 'Select HTTP method'
+  //     }) || methods[0];
+  //   }
+    
+  //   const fetchCode = await generateFetchCodeForApi(selectedApi, selectedMethod);
+  //   const editor = vscode.window.activeTextEditor;
 
-      const sourceFiles = getAllSourceFiles(folderPath);
-      const apiDoc: ApiDoc = {
-        openapi: "3.0.0",
-        info: {
-          title: "API Documentation",
-          description: "Auto-generated from Spring Boot controllers",
-          version: "1.0.0",
-        },
-        servers: [{ url: "http://localhost:8080" }],
-        paths: {},
-      };
+  //   if (editor) {
+  //     const fetchSnippet = await generateFetchCodeForApi(selectedApi, selectedMethod);
 
-      for (const filePath of sourceFiles) {
-        const content = fs.readFileSync(filePath, "utf-8");
-        if (filePath.endsWith(".java") && content.includes("@RestController")) {
-          const doc = parseJavaControllerToApiDoc(content);
-          Object.assign(apiDoc.paths, doc.paths);
-        } else if (
-          filePath.endsWith(".ts") &&
-          content.match(/@(Get|Post|Put|Delete|Patch)/)
-        ) {
-          const doc = parseTypeScriptControllerToApiDoc(content);
-          Object.assign(apiDoc.paths, doc.paths);
-        }
-      }
+  //     // 👇 插入前顯示提示
+  //     vscode.window.showInformationMessage('⚙️ Generating API function...');
+  //     await editor.insertSnippet(fetchSnippet, editor.selection.active);
 
-      const outputPath = path.join(folderPath, "api.json");
-      fs.writeFileSync(outputPath, JSON.stringify(apiDoc, null, 2), "utf-8");
+  //     const fullText = editor.document.getText();
+  //     const insertedCode = fetchSnippet.value;
 
-      vscode.window.showInformationMessage(
-        `✅ API 文件已儲存到：${outputPath}`
-      );
-      const document = await vscode.workspace.openTextDocument(outputPath);
-      vscode.window.showTextDocument(document);
-    }
-  );
+  //     const prompt = `Based on the following original code written by the user, please determine whether the language is JavaScript or TypeScript:
 
-  const openWebviewCmd = vscode.commands.registerCommand(
-	"jennieapi.openWebview",
-	() => {
-	  const panel = vscode.window.createWebviewPanel(
-		"jennieWebview",
-		"Jennie WebView",
-		vscode.ViewColumn.One,
-		{
-		  enableScripts: true,
-		}
-	  );
+  //     \`\`\`
+  //     ${fullText}
+  //     \`\`\`
+
+  //     The following API fetch code was just inserted into it:
+
+  //     \`\`\`
+  //     ${insertedCode}
+  //     \`\`\`
+
+  //     Please intelligently integrate the inserted code into the original code. If there are any missing parameters or properties (such as in the request body), make reasonable assumptions to fill them in. Ensure that the final code is complete, properly formatted, and executable.
+
+  //     ⚠️ Important: Your response must contain only the final code, without any explanations, comments, or code block markers like \`\`\`.`;
+
+  //     // 👇 重新格式化提示
+  //     vscode.window.showInformationMessage('🧠 Refining API function...');
+  //     const newCode = await generateResponse(prompt);
+
+  //     if (newCode) {
+  //       const entireRange = new vscode.Range(
+  //         editor.document.positionAt(0),
+  //         editor.document.positionAt(fullText.length)
+  //       );
+
+  //       await editor.edit(editBuilder => {
+  //         editBuilder.replace(entireRange, newCode);
+  //       });
+
+  //       // 👇 成功完成提示
+  //       vscode.window.showInformationMessage('✅ Successfully added and refined the API function!');
+  //     } else {
+  //       vscode.window.showErrorMessage("❌ LLM failed to generate refined code.");
+  //     }
+  //   } else {
+  //     vscode.window.showErrorMessage("No active text editor found.");
+  //   }
+    
+  // }
   
-	  // HTML 路徑
-	  const htmlUri = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview.html');
-  
-	  // 圖片路徑轉換
-	  const iconFolder = vscode.Uri.joinPath(context.extensionUri, "icon");
-	  const lightIcon = panel.webview.asWebviewUri(vscode.Uri.joinPath(iconFolder, "light theme.png"));
-	  const darkIcon = panel.webview.asWebviewUri(vscode.Uri.joinPath(iconFolder, "dark theme.png"));
-	  const button1 = panel.webview.asWebviewUri(vscode.Uri.joinPath(iconFolder, "button1.png"));
-	  const button2 = panel.webview.asWebviewUri(vscode.Uri.joinPath(iconFolder, "button2.png"));
-  
-	  // 讀取 HTML 並替換佔位符
-	  const htmlContent = fs
-		.readFileSync(htmlUri.fsPath, "utf8")
-		.replaceAll("{{LIGHT_ICON}}", lightIcon.toString())
-		.replaceAll("{{DARK_ICON}}", darkIcon.toString())
-		.replaceAll("{{BUTTON1}}", button1.toString())
-		.replaceAll("{{BUTTON2}}", button2.toString());
-  
-	  // 指定給 WebView 顯示
-	  panel.webview.html = htmlContent;
-  
-	  vscode.window.showInformationMessage("✅ WebView with dynamic icons loaded!");
-	}
-  );
-  
 
-  const testapiCmd = vscode.commands.registerCommand(
-    "jennieapi.testapiCmd",
-    async () => {
-      const result = await generateResponse("hi");
-      vscode.window.showInformationMessage(result);
-    }
-  );
-
-  // Function to generate fetch code via command
-  async function generateFetchCode() {
-    const apis = await getApiPaths();
-    if (apis.length === 0) {
-      return;
-    }
-
-    const selectedApi = await vscode.window.showQuickPick(apis, {
-      placeHolder: "Select an API",
-    });
-    if (!selectedApi) {
-      return;
-    }
-
-    // Get methods available for this API
-    const apiDocs = await readApiDocs();
-    const pathInfo = apiDocs?.paths[selectedApi];
-
-    if (!pathInfo) {
-      vscode.window.showErrorMessage("API path info not found");
-      return;
-    }
-
-    // Find available methods for this endpoint
-    const methods = ["get", "post", "put", "delete", "patch"].filter(
-      (method) => pathInfo[method as keyof typeof pathInfo]
-    );
-
-    // If no methods found, default to GET
-    if (methods.length === 0) {
-      methods.push("get");
-    }
-
-    // If only one method, use it directly
-    let selectedMethod = methods[0];
-
-    // If multiple methods, let user choose
-    if (methods.length > 1) {
-      selectedMethod =
-        (await vscode.window.showQuickPick(methods, {
-          placeHolder: "Select HTTP method",
-        })) || methods[0];
-    }
-
-    const fetchCode = await generateFetchCodeForApi(
-      selectedApi,
-      selectedMethod
-    );
-
-    const editor = vscode.window.activeTextEditor;
-    if (editor) {
-      editor.edit((editBuilder) => {
-        editBuilder.insert(editor.selection.active, fetchCode);
-      });
-    } else {
-      vscode.window.showErrorMessage("No active text editor found.");
-    }
-  }
-
-  const fetchApiCmd = vscode.commands.registerCommand(
-    "jennieapi.fetchApiList",
-    async () => {
-      await generateFetchCode(); // Call the function to generate the fetch code
-    }
-  );
-
-  // Register the context menu command for right-click
-  const showApiListCmd = vscode.commands.registerCommand(
-    "jennieapi.showApiList",
-    async (uri: vscode.Uri) => {
-      await generateFetchCode(); // Call the same function to generate the fetch code when right-clicked
-    }
-  );
+  // // Register the context menu command for right-click
+  // const showApiListCmd = vscode.commands.registerCommand('jennieapi.showApiList', async (uri: vscode.Uri) => {
+  //   await generateFetchCode();  // Call the same function to generate the fetch code when right-clicked
+  // });
 
   // Set up auto-suggestion for API fetch code with improved detection
   const autoSuggestDisposable = vscode.languages.registerCodeActionsProvider(
-    ["javascript", "typescript", "javascriptreact", "typescriptreact"],
+    ['javascript', 'typescript', 'javascriptreact', 'typescriptreact'],
     {
       async provideCodeActions(document, range, context, token) {
         const line = document.lineAt(range.start.line);
         const lineText = line.text;
-
+        
         // Get a window of code for better context
         const startLine = Math.max(0, range.start.line - 2);
         const endLine = Math.min(document.lineCount - 1, range.start.line + 2);
-
-        let contextCode = "";
+        
+        let contextCode = '';
         for (let i = startLine; i <= endLine; i++) {
-          contextCode += document.lineAt(i).text + "\n";
+          contextCode += document.lineAt(i).text + '\n';
         }
-
+        
         // Check if the code indicates intent to use an API
         const isApiIntent = await isApiFetchIntent(contextCode);
-
+        
         if (isApiIntent) {
           return [
             {
-              title: "💡 Suggest API endpoints",
-              command: "jennieapi.suggestApiEndpoints",
-              arguments: [document, range.start.line],
-            },
+              title: '💡 Suggest API endpoints',
+              command: 'jennieapi.suggestApiEndpoints',
+              arguments: [document, range.start.line]
+            }
           ];
         }
-
+        
         return [];
-      },
+      }
     }
   );
+  // ✅ 抽出：建立 LLM prompt
+  function buildRefactorPrompt(fullText: string, insertedCode: string): string {
+    return `Based on the following original code written by the user, please determine whether the language is JavaScript or TypeScript:
+
+    \`\`\`
+    ${fullText}
+    \`\`\`
+
+    The following API fetch code was just inserted into it:
+
+    \`\`\`
+    ${insertedCode}
+    \`\`\`
+
+    Please intelligently integrate the inserted code into the original code. If there are any missing parameters or properties (such as in the request body), make reasonable assumptions to fill them in. Ensure that the final code is complete, properly formatted, and executable.
+
+    ⚠️ Important: Your response must contain only the final code, without any explanations, comments, or code block markers like \`\`\`.`;
+  }
+
+  // 等待指定毫秒數的 Promise helper
+  function sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 
   // Command to suggest API endpoints based on the current code context
   const suggestApiEndpointsCmd = vscode.commands.registerCommand(
-    "jennieapi.suggestApiEndpoints",
+    'jennieapi.suggestApiEndpoints',
     async (documentArg?: vscode.TextDocument, lineArg?: number) => {
       // Get the active text editor
       const editor = vscode.window.activeTextEditor;
@@ -1070,192 +703,216 @@ export function activate(context: vscode.ExtensionContext) {
         vscode.window.showErrorMessage("No active text editor found.");
         return;
       }
-
+      
       // Use provided document or default to active editor's document
       const document = documentArg || editor.document;
-
+      
       // Use provided line or default to the current cursor position
-      const line =
-        typeof lineArg === "number" ? lineArg : editor.selection.active.line;
-
+      const line = typeof lineArg === 'number' ? lineArg : editor.selection.active.line;
+      
       // Get context from document
       const startLine = Math.max(0, line - 5);
       const endLine = Math.min(document.lineCount - 1, line + 5);
-
-      let contextCode = "";
+      
+      let contextCode = '';
       for (let i = startLine; i <= endLine; i++) {
-        contextCode += document.lineAt(i).text + "\n";
+        contextCode += document.lineAt(i).text + '\n';
       }
-
+      
       // Find relevant APIs using cosine similarity
       const relevantApis = await findRelevantApis(contextCode, line);
-
+      
       if (relevantApis.length === 0) {
-        vscode.window.showInformationMessage("No relevant API endpoints found");
+        vscode.window.showInformationMessage('No relevant API endpoints found');
         return;
       }
-
-      const items = relevantApis.map((api) => ({
+      
+      const items = relevantApis.map(api => ({
         label: `${api.method.toUpperCase()} ${api.path}`,
         description: api.description,
         detail: `Relevance: ${Math.round(api.similarity * 100)}%`,
-        api: api,
+        api: api
       }));
-
+      
       const selected = await vscode.window.showQuickPick(items, {
-        placeHolder: "Select an API endpoint to insert fetch code",
+        placeHolder: 'Select an API endpoint to insert fetch code'
       });
 
       if (selected) {
-        const fetchCode = await generateFetchCodeForApi(
-          selected.api.path,
-          selected.api.method
+        // vscode.window.showInformationMessage('⚙️ Generating API function...');
+        // Step 1: Generating API function
+        let snippet: vscode.SnippetString = new vscode.SnippetString();
+        
+        await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: "⚙️ Generating API function...",
+            cancellable: false,
+          },
+          async (_progress) => {
+            await sleep(3000);
+            snippet = await generateFetchCodeForApi(selected.api.path, selected.api.method);
+            await editor.insertSnippet(snippet, editor.selection.active);
+          }
         );
-        editor.edit((editBuilder) => {
-          // Insert at the cursor position
-          editBuilder.insert(editor.selection.active, fetchCode);
-        });
+
+        // Step 2: Refining with LLM
+        const fullText = editor.document.getText();
+        const insertedCode = snippet.value;
+        const prompt = buildRefactorPrompt(fullText, insertedCode);
+
+        await vscode.window.withProgress(
+          {
+            location: vscode.ProgressLocation.Notification,
+            title: "🧠 Refining API function...",
+            cancellable: false,
+          },
+          async (_progress) => {
+            const newCode = await generateResponse(prompt);
+
+            if (newCode) {
+              const entireRange = new vscode.Range(
+                editor.document.positionAt(0),
+                editor.document.positionAt(fullText.length)
+              );
+
+              await editor.edit(editBuilder => {
+                editBuilder.replace(entireRange, newCode);
+              });
+
+              // progress.report({ increment: 100 });
+              // ✅ 成功完成提示 (這行是非 blocking 的，會出現在右下角)
+              vscode.window.showInformationMessage("✅ Successfully added and refined the API function!");
+            } else {
+              vscode.window.showErrorMessage("❌ LLM failed to generate refined code.");
+            }
+          }
+        );
+        
       }
+      
     }
   );
 
   // Enhanced hover provider to show API documentation when hovering over API paths
   const hoverProvider = vscode.languages.registerHoverProvider(
-    ["javascript", "typescript", "javascriptreact", "typescriptreact"],
+    ['javascript', 'typescript', 'javascriptreact', 'typescriptreact'],
     {
       async provideHover(document, position, token) {
         const range = document.getWordRangeAtPosition(position);
         if (!range) {
           return;
         }
-
+        
         const word = document.getText(range);
-
+        
         // Check if this might be an API path
         const apiDocs = await readApiDocs();
         if (!apiDocs) {
           return;
         }
-
+        
         // Look for paths that contain this word or paths that match exactly
-        const relevantPaths = Object.keys(apiDocs.paths).filter(
-          (path) => path.includes(word) || path === word
+        const relevantPaths = Object.keys(apiDocs.paths).filter(path => 
+          path.includes(word) || path === word
         );
-
+        
         if (relevantPaths.length > 0) {
           const markdownContent: string[] = [];
-
+          
           for (const path of relevantPaths) {
             const pathInfo = apiDocs.paths[path];
-
+            
             markdownContent.push(`### API: \`${path}\``);
-
+            
             // Add methods information
-            const methods = ["get", "post", "put", "delete", "patch"].filter(
-              (method) => pathInfo[method as keyof typeof pathInfo]
-            );
-
+            const methods = ['get', 'post', 'put', 'delete', 'patch']
+              .filter(method => pathInfo[method as keyof typeof pathInfo]);
+            
             for (const method of methods) {
-              const endpoint = pathInfo[
-                method as keyof typeof pathInfo
-              ] as ApiEndpoint;
+              const endpoint = pathInfo[method as keyof typeof pathInfo] as ApiEndpoint;
               if (!endpoint) {
                 continue;
               }
-
+              
               markdownContent.push(`\n**${method.toUpperCase()}**`);
-
+              
               if (endpoint.summary) {
                 markdownContent.push(`\n${endpoint.summary}`);
               }
-
+              
               if (endpoint.description) {
                 markdownContent.push(`\n${endpoint.description}`);
               }
-
+              
               // Add response codes
               if (endpoint.responses) {
                 markdownContent.push(`\n**Responses:**`);
                 for (const [code, desc] of Object.entries(endpoint.responses)) {
-                  markdownContent.push(
-                    `- ${code}: ${
-                      (desc as any).description || "No description"
-                    }`
-                  );
+                  markdownContent.push(`- ${code}: ${(desc as any).description || 'No description'}`);
                 }
               }
             }
           }
-
-          return new vscode.Hover(markdownContent.join("\n"));
+          
+          return new vscode.Hover(markdownContent.join('\n'));
         }
-      },
+      }
     }
   );
 
   // Subscribe to text editor changes to provide real-time API suggestions
-  const editorChangeDisposable = vscode.workspace.onDidChangeTextDocument(
-    async (event) => {
-      const editor = vscode.window.activeTextEditor;
-      if (!editor || editor.document !== event.document) {
-        return;
-      }
+  const editorChangeDisposable = vscode.workspace.onDidChangeTextDocument(async event => {
+    const editor = vscode.window.activeTextEditor;
+    if (!editor || editor.document !== event.document) {
+      return;
+    }
 
-      // Check if we're in a supported file type
-      const supportedLanguages = [
-        "javascript",
-        "typescript",
-        "javascriptreact",
-        "typescriptreact",
-      ];
-      if (!supportedLanguages.includes(editor.document.languageId)) {
-        return;
-      }
+    // Check if we're in a supported file type
+    const supportedLanguages = ['javascript', 'typescript', 'javascriptreact', 'typescriptreact'];
+    if (!supportedLanguages.includes(editor.document.languageId)) {
+      return;
+    }
 
-      // Process changes to detect fetch intent
-      for (const change of event.contentChanges) {
-        // Check if this is a line being completed
-        if (change.text === ";" || change.text === "\n") {
-          const lineNumber = editor.document.positionAt(
-            change.rangeOffset
-          ).line;
-
-          // Get context from surrounding lines
-          const startLine = Math.max(0, lineNumber - 2);
-          const endLine = Math.min(
-            editor.document.lineCount - 1,
-            lineNumber + 2
-          );
-
-          let contextCode = "";
-          for (let i = startLine; i <= endLine; i++) {
-            contextCode += editor.document.lineAt(i).text + "\n";
-          }
-
-          // If line indicates fetch intent, show the light bulb (code action)
-          const isApiIntent = await isApiFetchIntent(contextCode);
-
-          if (isApiIntent) {
-            // We don't need to do anything here as the code action provider will be triggered
-            // This just ensures a change that indicates fetch intent is processed
-            // Optionally, we could show a notification that API suggestions are available
-            // vscode.window.showInformationMessage('💡 API suggestions available. Click the lightbulb or press Ctrl+.');
-          }
+    // Process changes to detect fetch intent
+    for (const change of event.contentChanges) {
+      // Check if this is a line being completed
+      if (change.text === ';' || change.text === '\n') {
+        const lineNumber = editor.document.positionAt(change.rangeOffset).line;
+        
+        // Get context from surrounding lines
+        const startLine = Math.max(0, lineNumber - 2);
+        const endLine = Math.min(editor.document.lineCount - 1, lineNumber + 2);
+        
+        let contextCode = '';
+        for (let i = startLine; i <= endLine; i++) {
+          contextCode += editor.document.lineAt(i).text + '\n';
+        }
+        
+        // If line indicates fetch intent, show the light bulb (code action)
+        const isApiIntent = await isApiFetchIntent(contextCode);
+        
+        if (isApiIntent) {
+          // We don't need to do anything here as the code action provider will be triggered
+          // This just ensures a change that indicates fetch intent is processed
+          
+          // Optionally, we could show a notification that API suggestions are available
+          // vscode.window.showInformationMessage('💡 API suggestions available. Click the lightbulb or press Ctrl+.');
         }
       }
     }
-  );
+  });
+  
 
   // Register all commands and listeners
   context.subscriptions.push(
     openWebviewCmd,
-    testapiCmd,
-    fetchApiCmd,
-    showApiListCmd,
+    testapiCmd, 
+    // fetchApiCmd, 
+    // showApiListCmd,
     autoSuggestDisposable,
     suggestApiEndpointsCmd,
     hoverProvider,
-    editorChangeDisposable,
-    generateApiJsonFromFolder
+    editorChangeDisposable
   );
 }
