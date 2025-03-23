@@ -1,48 +1,71 @@
 {
   "name": "jennieapi",
   "displayName": "JennieAPI",
-  "description": "",
+  "description": "API Integration Assistant for VSCode",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.98.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Programming Languages",
+    "Snippets"
   ],
   "activationEvents": [
-    "onCommand:jennieapi.helloWorld",
-    "onCommand:jennieapi.testapiCmd",
-    "onCommand:jennieapi.openWebview",
-    "onCommand:jennieapi.insertApiCode"
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "jennieapi.helloWorld",
-        "title": "Hello World"
-      },
-      {
-        "command": "jennieapi.testapiCmd",
-        "title": "Test API"
-      },
-      {
         "command": "jennieapi.openWebview",
         "title": "JennieAPI: Open API Connector"
       },
       {
-        "command": "jennieapi.insertApiCode",
-        "title": "JennieAPI: 插入 API 程式碼"
+        "command": "jennieapi.testapiCmd",
+        "title": "JennieAPI: Test API Connection"
+      },
+      {
+        "command": "jennieapi.fetchApiList",
+        "title": "JennieAPI: Generate API Fetch Code"
+      },
+      {
+        "command": "jennieapi.showApiList",
+        "title": "JennieAPI: Show API Endpoints",
+        "category": "Jennie API"
+      },
+      {
+        "command": "jennieapi.suggestApiEndpoints",
+        "title": "JennieAPI: Suggest API Endpoints",
+        "category": "Jennie API"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "jennieapi.insertApiCode",
-          "when": "editorTextFocus",
+          "command": "jennieapi.showApiList",
+          "when": "editorLangId =~ /(javascript|typescript|javascriptreact|typescriptreact)/",
+          "group": "navigation"
+        },
+        {
+          "command": "jennieapi.suggestApiEndpoints",
+          "when": "editorLangId =~ /(javascript|typescript|javascriptreact|typescriptreact)/",
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "JennieAPI",
+      "properties": {
+        "jennieapi.apiDocsPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the API documentation file (JSON format)"
+        }
+      }
     }
   },
   "scripts": {
