@@ -754,13 +754,24 @@ function activate(context) {
         const panel = vscode.window.createWebviewPanel("jennieWebview", "Jennie WebView", vscode.ViewColumn.One, {
             enableScripts: true,
         });
-        // 取得 HTML 檔案路徑
-        const htmlPath = path.join(context.extensionPath, "media", "webview.html");
-        // 讀取 HTML 檔案內容
-        const htmlContent = fs.readFileSync(htmlPath, "utf8");
-        // 設定 Webview HTML
+        // HTML 路徑
+        const htmlUri = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview.html');
+        // 圖片路徑轉換
+        const iconFolder = vscode.Uri.joinPath(context.extensionUri, "icon");
+        const lightIcon = panel.webview.asWebviewUri(vscode.Uri.joinPath(iconFolder, "light theme.png"));
+        const darkIcon = panel.webview.asWebviewUri(vscode.Uri.joinPath(iconFolder, "dark theme.png"));
+        const button1 = panel.webview.asWebviewUri(vscode.Uri.joinPath(iconFolder, "button1.png"));
+        const button2 = panel.webview.asWebviewUri(vscode.Uri.joinPath(iconFolder, "button2.png"));
+        // 讀取 HTML 並替換佔位符
+        const htmlContent = fs
+            .readFileSync(htmlUri.fsPath, "utf8")
+            .replaceAll("{{LIGHT_ICON}}", lightIcon.toString())
+            .replaceAll("{{DARK_ICON}}", darkIcon.toString())
+            .replaceAll("{{BUTTON1}}", button1.toString())
+            .replaceAll("{{BUTTON2}}", button2.toString());
+        // 指定給 WebView 顯示
         panel.webview.html = htmlContent;
-        vscode.window.showInformationMessage("JennieAPI WebView UI 仍然存在喔！");
+        vscode.window.showInformationMessage("✅ WebView with dynamic icons loaded!");
     });
     const testapiCmd = vscode.commands.registerCommand("jennieapi.testapiCmd", async () => {
         const result = await generateResponse("hi");

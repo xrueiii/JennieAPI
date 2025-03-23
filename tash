@@ -1,0 +1,25 @@
+* [33m06c4922[m[33m ([m[1;32mmain[m[33m)[m gui frontend fixing
+* [33mb767167[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m please
+*   [33mee8eaae[m Merge pull request #3 from xrueiii/for-backend
+[32m|[m[33m\[m  
+[32m|[m *   [33m206f4e4[m[33m ([m[1;31morigin/for-backend[m[33m)[m Merge branch 'main' into for-backend
+[32m|[m [34m|[m[32m\[m  
+[32m|[m [34m|[m[32m/[m  
+[32m|[m[32m/[m[34m|[m   
+* [34m|[m [33ma896c75[m cosine similarity logic fixed
+[35m|[m * [33mb487d4c[m generate api json
+[35m|[m[35m/[m  
+* [33m69642b9[m Hank try
+*   [33mff78469[m Merge pull request #2 from xrueiii/wayne
+[36m|[m[1;31m\[m  
+[36m|[m * [33m9200edd[m[33m ([m[1;31morigin/wayne[m[33m)[m fix azure ai error
+[36m|[m * [33me94c613[m add azure api
+[36m|[m[36m/[m  
+*   [33m254a304[m Merge pull request #1 from xrueiii/test-4o
+[1;32m|[m[1;33m\[m  
+[1;32m|[m * [33m893dd53[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mtest-4o[m[33m, [m[1;31morigin/test-4o[m[33m)[m right button
+[1;32m|[m[1;32m/[m  
+* [33m72ce275[m Add gitignore
+* [33m32f0249[m remove node_modules
+* [33mbaf2e55[m init repo
+* [33m67232f6[m Initial commit
