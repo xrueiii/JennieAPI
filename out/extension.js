@@ -295,7 +295,6 @@ async function findRelevantApis(currentCode, lineNumber) {
             ].join(" ");
             // Calculate similarity between keywords and API text
             const similarity = calculateCosineSimilarity(combinedKeywords, apiText);
-
             if (similarity > 0) { // threshold to consider it a match
                 matches.push({
                     path,
