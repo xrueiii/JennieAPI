@@ -1,34 +1,64 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>JennieAPI Connector</title>
   <style>
+    :root {
+      --background-light: #f9f9f9;
+      --foreground-light: #333;
+      --card-bg-light: #ffffff;
+      --input-bg-light: #fafafa;
+      --pre-bg-light: #f1f1f1;
+
+      --background-dark: #1e1e1e;
+      --foreground-dark: #f9f9f9;
+      --card-bg-dark: #252526;
+      --input-bg-dark: #2d2d30;
+      --pre-bg-dark: #2d2d30;
+
+      --accent: #00bcd4;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 0;
-      background: #f9f9f9;
-      color: #333;
+      background-color: var(--background);
+      color: var(--foreground);
+      transition: all 0.3s ease;
     }
+
     .container {
       max-width: 900px;
       margin: 40px auto;
       padding: 30px;
-      background: #ffffff;
+      background-color: var(--card-bg);
       border-radius: 12px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     }
+
     h2 {
       margin-bottom: 20px;
-      color: #007acc;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
     }
+
+    h2 img {
+      height: 32px;
+      margin-right: 12px;
+    }
+
     label {
       font-weight: 600;
       display: block;
       margin-top: 20px;
       margin-bottom: 6px;
     }
+
     input, textarea {
       width: 100%;
       padding: 10px;
@@ -36,16 +66,19 @@
       border: 1px solid #ccc;
       border-radius: 8px;
       font-family: monospace;
-      background-color: #fafafa;
+      background-color: var(--input-bg);
+      color: var(--foreground);
       transition: border 0.2s ease;
     }
+
     input:focus, textarea:focus {
-      border-color: #007acc;
+      border-color: var(--accent);
       outline: none;
     }
+
     button {
       margin-top: 20px;
-      background-color: #007acc;
+      background-color: var(--accent);
       color: white;
       border: none;
       padding: 10px 24px;
@@ -54,11 +87,13 @@
       cursor: pointer;
       transition: background-color 0.2s ease;
     }
+
     button:hover {
-      background-color: #005fa3;
+      background-color: #0086a3;
     }
+
     pre {
-      background: #f1f1f1;
+      background-color: var(--pre-bg);
       padding: 15px;
       margin-top: 20px;
       border-radius: 8px;
@@ -67,18 +102,35 @@
       font-size: 13px;
       white-space: pre-wrap;
     }
+
     .fade-in {
       animation: fadeIn 0.4s ease-in;
     }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      color: var(--accent);
+    }
+
+    .icon-img {
+      height: 32px;
+      margin-right: 12px;
+    }
   </style>
 </head>
 <body>
+  <div class="theme-toggle" onclick="toggleTheme()">Theme</div>
   <div class="container">
-    <h2>🔌 JennieAPI Connector</h2>
+    <h2><img id="themeIcon" src="{{LIGHT_ICON}}" class="icon-img" alt="Penguin Icon" /> JennieAPI Connector</h2>
 
     <label>API URL</label>
     <input id="url" placeholder="https://api.openai.com/v1/chat/completions" />
@@ -89,7 +141,7 @@
     <label>Body (JSON)</label>
     <textarea id="body" rows="6">{ "model": "gpt-3.5-turbo", "messages": [{ "role": "user", "content": "Hello" }] }</textarea>
 
-    <button id="sendBtn" onclick="sendRequest()">🚀 Send API Request</button>
+    <button id="sendBtn" onclick="sendRequest()"><img src="{{BUTTON1}}" height="14" style="vertical-align: middle; margin-right: 8px;" />Send API Request</button>
 
     <h3 style="margin-top: 30px;">📦 HTTP Status</h3>
     <pre id="statusBox" class="fade-in">// Waiting for status...</pre>
@@ -99,11 +151,33 @@
 
     <h3 style="margin-top: 30px;">🧩 Generated fetch Code</h3>
     <pre id="codeBlock" class="fade-in">// Code snippet will appear here</pre>
-    <button onclick="copyCode()">📋 Copy</button>
-    <button onclick="sendCodeToVSCode()">📥 Insert to Current File</button>
+    <button onclick="copyCode()"><img src="{{BUTTON1}}" height="14" style="vertical-align: middle; margin-right: 8px;" />Copy</button>
+    <button onclick="sendCodeToVSCode()"><img src="{{BUTTON2}}" height="14" style="vertical-align: middle; margin-right: 8px;" />Insert to Current File</button>
   </div>
 
   <script>
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    let darkMode = prefersDark;
+
+    function applyTheme() {
+      const root = document.documentElement;
+      document.body.style.setProperty('--background', darkMode ? getComputedStyle(root).getPropertyValue('--background-dark') : getComputedStyle(root).getPropertyValue('--background-light'));
+      document.body.style.setProperty('--foreground', darkMode ? getComputedStyle(root).getPropertyValue('--foreground-dark') : getComputedStyle(root).getPropertyValue('--foreground-light'));
+      document.body.style.setProperty('--card-bg', darkMode ? getComputedStyle(root).getPropertyValue('--card-bg-dark') : getComputedStyle(root).getPropertyValue('--card-bg-light'));
+      document.body.style.setProperty('--input-bg', darkMode ? getComputedStyle(root).getPropertyValue('--input-bg-dark') : getComputedStyle(root).getPropertyValue('--input-bg-light'));
+      document.body.style.setProperty('--pre-bg', darkMode ? getComputedStyle(root).getPropertyValue('--pre-bg-dark') : getComputedStyle(root).getPropertyValue('--pre-bg-light'));
+
+      const icon = document.getElementById("themeIcon");
+      icon.src = darkMode ? "{{DARK_ICON}}" : "{{LIGHT_ICON}}";
+    }
+
+    function toggleTheme() {
+      darkMode = !darkMode;
+      applyTheme();
+    }
+
+    applyTheme();
+
     async function sendRequest() {
       const btn = document.getElementById('sendBtn');
       const url = document.getElementById('url').value;
@@ -112,7 +186,7 @@
       const responseBox = document.getElementById('response');
       const statusBox = document.getElementById('statusBox');
 
-      btn.textContent = "⏳ Sending...";
+      btn.textContent = "Sending...";
       btn.disabled = true;
       responseBox.textContent = "// Waiting for response...";
       statusBox.textContent = "// Waiting for status...";
@@ -126,25 +200,14 @@
           body: JSON.stringify(body)
         });
 
-        // 狀態顯示
         statusBox.textContent = `${res.status} ${res.statusText}`;
         statusBox.classList.add("fade-in");
 
-        // 判斷回傳格式
         const contentType = res.headers.get("content-type") || "";
-        let result;
+        let result = contentType.includes("application/json") ? await res.json() : await res.text();
 
-        if (contentType.includes("application/json")) {
-          result = await res.json();
-        } else {
-          result = await res.text();
-        }
+        responseBox.textContent = typeof result === "string" ? result : JSON.stringify(result, null, 2);
 
-        responseBox.textContent = typeof result === "string"
-          ? result
-          : JSON.stringify(result, null, 2);
-
-        // 產生 fetch code
         const fetchCode = `fetch("${url}", {
   method: "POST",
   headers: ${JSON.stringify(headers, null, 2)},
@@ -160,7 +223,7 @@
         statusBox.textContent = `❌ Request failed`;
       }
 
-      btn.textContent = "🚀 Send API Request";
+      btn.textContent = "Send API Request";
       btn.disabled = false;
       responseBox.classList.add("fade-in");
     }
@@ -171,7 +234,7 @@
         alert("✅ Code copied to clipboard!");
       });
     }
-    
+
     function sendCodeToVSCode() {
       const vscode = acquireVsCodeApi();
       const code = document.getElementById('codeBlock').textContent;
