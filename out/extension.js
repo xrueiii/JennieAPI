@@ -255,7 +255,7 @@ async function findRelevantApis(currentCode, lineNumber) {
             ].join(' ');
             // Calculate similarity between keywords and API text
             const similarity = calculateCosineSimilarity(combinedKeywords, apiText);
-            if (similarity > 0.1) { // threshold to consider it a match
+            if (similarity > 0) { // threshold to consider it a match
                 matches.push({
                     path,
                     method,
@@ -268,7 +268,7 @@ async function findRelevantApis(currentCode, lineNumber) {
     // Sort by similarity score and return top matches
     return matches
         .sort((a, b) => b.similarity - a.similarity)
-        .slice(0, 5);
+        .slice(0, 3);
 }
 // Use LLM to determine if the current code is attempting to make an API call
 async function isApiFetchIntent(code) {
