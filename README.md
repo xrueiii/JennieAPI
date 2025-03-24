@@ -1,6 +1,6 @@
 # JennieAPI 🚀
 
-![JennieAPI Logo](icon/light theme.png)  
+![JennieAPI Logo](icon/button1.png)  
 *A powerful API assistant for seamless integrations!*
 
 ## 🌟 Features
