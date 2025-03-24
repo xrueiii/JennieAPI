@@ -92,7 +92,7 @@ We welcome contributions! To contribute:
 - Some OpenAPI 2.0 specs may not be fully supported.
 - Ensure the API file is in the root directory for automatic detection.
 
-Check out our [issue tracker](https://github.com/your-repo/issues) for reported bugs and feature requests.
+Check out our [issue tracker](https://github.com/xrueiii/JennieAPI/issues) for reported bugs and feature requests.
 
 ---
 
