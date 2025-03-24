@@ -1,7 +1,7 @@
 # JennieAPI
 
 <p align="center">
-  <img src="logo/button1" width="200" alt="JennieAPI Logo">
+  <img src="icon/button1" width="200" alt="JennieAPI Logo">
 </p>
 
 <p align="center">
