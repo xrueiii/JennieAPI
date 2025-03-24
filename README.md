@@ -1,71 +1,65 @@
-# jennieapi README
+# JennieAPI 🚀
 
-This is the README for your extension "jennieapi". After writing up a brief description, we recommend including the following sections.
+![JennieAPI Logo](icon/light_theme.png)  
+*A powerful API assistant for seamless integrations!*
 
-## Features
+## 🌟 Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- 📌 **Automated API Parsing** – Reads API documentation and extracts endpoints.
+- ⚡ **Intelligent Code Generation** – Generates front-end integration code automatically.
+- 🔍 **Quick Search & Filtering** – Easily find and select the required API.
+- 🛠 **Supports Multiple API Formats** – Works with OpenAPI, Swagger, and more.
+- 🔗 **Seamless VS Code Integration** – Boosts productivity right inside your IDE.
 
-For example if there is an image subfolder under your extension project workspace:
+## 📦 Installation
 
-\!\[feature X\]\(images/feature-x.png\)
+1. Open **VS Code**
+2. Go to **Extensions** (`Ctrl+Shift+X`)
+3. Search for **JennieAPI**
+4. Click **Install**
+5. Enjoy the automation! 🎉
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## 🚀 Getting Started
 
-## Requirements
+1. Place your API documentation file (e.g., `swagger.json`) in your project root.
+2. Open the **JennieAPI Panel** in VS Code.
+3. Select an API endpoint from the list.
+4. Generate the integration code with a single click!
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## ⚙️ Extension Settings
 
-## Extension Settings
+| Setting                | Description |
+|------------------------|-------------|
+| `jennieapi.enable`    | Enable or disable JennieAPI. |
+| `jennieapi.apiPath`   | Set the default API documentation path. |
+| `jennieapi.autoGen`   | Enable automatic code generation. |
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## 🛠 Requirements
 
-For example:
+- Visual Studio Code (Latest Version)
+- Node.js (for some advanced features)
 
-This extension contributes the following settings:
+## 🐞 Known Issues
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+- Some API formats may require additional configuration.
+- If auto-generation fails, try restarting VS Code.
 
-## Known Issues
+## 📜 License
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+JennieAPI is licensed under the **MIT License**.
 
-## Release Notes
+## 🆕 Release Notes
 
-Users appreciate release notes as you update your extension.
+### v1.0.0
+- Initial release with core API parsing and code generation.
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+### v1.1.0
+- Added support for additional API formats.
+- Improved search functionality.
 
 ---
 
-## Following extension guidelines
+### 🌍 Connect With Us
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+Have suggestions or need support? Feel free to open an issue or contribute! 😊
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
