@@ -1,105 +1,112 @@
-# JennieAPI
+# Jennie API Helper – VS Code Extension 🚀
 
-<p align="center">
-  <img src="icon/button1.png" width="200" alt="JennieAPI Logo">
-</p>
-
-<p align="center">
-  <b>Effortless API Integration for Developers</b>
-  <br>
-  <a href="#installation">Installation</a> •
-  <a href="#features">Features</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#contributing">Contributing</a> •
-  <a href="#license">License</a>
-</p>
+This VS Code extension helps developers integrate and explore backend APIs more easily by leveraging OpenAPI specifications and AI-assisted suggestions. It allows you to generate OpenAPI documentation from source code, suggest relevant API endpoints based on context, and even auto-generate and refine fetch code snippets.
 
 ---
 
-## 🚀 Introduction
+## ✨ Features
 
-**JennieAPI** is a powerful VS Code extension designed to streamline API integration in your projects. It automatically reads API specifications from your project and generates the necessary frontend integration code, reducing development time and minimizing errors.
-
----
-
-## 🔥 Features
-
-- 📌 **Automatic API Parsing** – Reads API specs from your project and generates integration code.
-- ⚡ **Supports OpenAPI & REST** – Works seamlessly with OpenAPI-based APIs and standard REST endpoints.
-- 🛠️ **One-Click Code Generation** – Instantly creates API request functions with proper types.
-- 🌍 **Supports Multiple Languages** – JavaScript, TypeScript, Python, and more.
-- 🚀 **Works with Azure OpenAI** – Parses API files intelligently using AI-powered analysis.
+- 🔍 Auto-detects API usage intent in code.
+- 💡 Suggests relevant endpoints from `api.json`.
+- ⚙️ Generates fetch code snippets using OpenAPI schema.
+- 🧠 Refines code using Azure OpenAI (GPT).
+- 📄 Converts Java/TypeScript controller files into OpenAPI JSON.
+- 🖼️ Webview support (optional UI features).
 
 ---
 
-## 📦 Installation
+## 📁 Project Structure
 
-To install JennieAPI in VS Code:
-
-1. Open VS Code and go to **Extensions** (`Ctrl+Shift+X`).
-2. Search for `JennieAPI`.
-3. Click **Install**.
-4. Reload VS Code if necessary.
-
-Or install manually via VS Code Marketplace:
-
-```sh
-code --install-extension jennieapi
+```yaml
+src/
+├── extension.ts               # Entry point
+├── commands/                  # VS Code commands
+│   ├── generateApiJson.ts     # Generate OpenAPI from controllers
+│   ├── suggestApiEndpoint.ts  # Suggest and insert API code
+│   ├── openTestWeb.ts         # Open the panel for API endpoint testing
+├── core/                      # Logic modules
+│   ├── openai.ts              # Azure OpenAI integration
+│   ├── apiDocs.ts             # Read + cache api.json
+│   ├── apiUtils.ts            # NLP and API match logic
+├── codegen/                   # Code generation helpers
+│   ├── fetchSnippet.ts        # Generate fetch snippet from schema
+│   └── refineCode.ts          # LLM refinement
+├── utils/
+│   └── file.ts                # File system utilities
+├── types/
+│   └── index.ts               # Type definitions (OpenAPI, etc.)
 ```
 
 ---
 
-## 🛠 Usage
+## ⚙️ Setup
 
-1. Place your API specification file (e.g., `openapi.json`) in the root of your project.
-2. Open the **JennieAPI** panel in VS Code.
-3. Select the API endpoint you want to use.
-4. Click **Generate Code** – the API request function will be automatically created.
+1. **Clone this repository:**
 
-Example output (TypeScript):
-
-```typescript
-import axios from 'axios';
-
-export async function fetchUserData(userId: string) {
-  const response = await axios.get(`/api/users/${userId}`);
-  return response.data;
-}
+```bash
+https://github.com/xrueiii/JennieAPI.git
+cd jennie-api-helper
+```
+2. **Create your .env file:** \
+  Copy the example file and fill in your own values:
+```bash
+  cp .env.example .env
+```
+Then edit .env and provide your Azure OpenAI credentials:
+```ini
+AZURE_OPENAI_FULL_URL=https://<your-endpoint>/openai/deployments/<deployment>/chat/completions?api-version=2025-01-01-preview
+AZURE_OPENAI_API_KEY=your-api-key-here
 ```
 
----
+## ▶️ Run the Extension
 
-## 📖 Documentation
+1. Open this folder in VS Code
 
-For detailed usage instructions, visit our [Official Documentation](https://your-docs-link.com).
+2. Press F5 to launch the extension in a new Extension Development Host window
 
----
+No need to run any extra servers — everything is local.
 
-## 🤝 Contributing
+## 🧪 Available Commands
 
-We welcome contributions! To contribute:
+- `JennieAPI: Generate API JSON from Folder`  
+  → Converts Java/TS backend controllers into OpenAPI paths
 
-1. Fork the repository.
-2. Create a new branch (`git checkout -b feature-name`).
-3. Make your changes and commit (`git commit -m "Added new feature"`).
-4. Push to your fork (`git push origin feature-name`).
-5. Open a pull request.
+- `JennieAPI: Suggest API Endpoints`  
+  → Suggests relevant endpoints based on nearby code
 
----
-
-## ⚠️ Known Issues
-
-- Some OpenAPI 2.0 specs may not be fully supported.
-- Ensure the API file is in the root directory for automatic detection.
-
-Check out our [issue tracker](https://github.com/xrueiii/JennieAPI/issues) for reported bugs and feature requests.
+- `JennieAPI: Open API Connector`  
+  → Opens a visual panel for testing API endpoints
 
 ---
 
-## 📝 License
+### 🧭 How to Use Each Command
 
-JennieAPI is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more details.
+1. **Generate API JSON from Folder**  
+   Right-click on your API folder in the Explorer panel, then select `JennieAPI: Generate API JSON from Folder`. This will scan your Java or TypeScript controller files and convert them into OpenAPI-compliant `api.json` documentation.
 
----
+2. **Suggest API Endpoints**  
+   While editing code, type your desired API function name. Then, right-click at the end of the line (or double-tap on Mac), and select `JennieAPI: Suggest API Endpoints`. Jennie will automatically detect your intent, find the most relevant API, and insert a fully connected `fetch()` function with minimal effort.
 
-<p align="center">💙 Built with love for developers 💙</p>
+3. **Open API Connector**  
+   Press `Cmd+Shift+P` (Mac) or `Ctrl+Shift+P` (Windows/Linux) to open the VS Code command palette. Search for `JennieAPI: Open API Connector` and select it. This will open a custom panel for testing your API endpoints directly within VS Code.
+
+
+## 🧠 Requirements
+- Azure OpenAI deployment with Chat Completion endpoint
+
+- `.env` file with valid credentials
+
+- Java or TypeScript backend with REST-style controllers
+
+- (Optional) OpenAPI-compatible server responses
+
+## 🛠 Development Notes
+- Written in TypeScript with full type safety
+
+- Uses dynamic import of `node-fetch` for compatibility
+
+- LLM prompt formatting handled cleanly via   `utils/  file.ts`
+
+- API similarity matching via keyword extraction + cosine similarity
+
+- Snippet generation respects schema and inserts `fetch()`-style code

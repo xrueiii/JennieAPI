@@ -1,5 +1,3 @@
-// src/types/index.ts
-
 /**
  * OpenAI message format
  */
