@@ -1,5 +1,3 @@
-// src/core/openai.ts
-
 import * as vscode from 'vscode';
 import * as dotenv from 'dotenv';
 import type { RequestInit as NodeFetchRequestInit } from 'node-fetch';
