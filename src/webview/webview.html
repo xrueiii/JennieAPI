@@ -136,10 +136,10 @@
     <input id="url" placeholder="https://api.openai.com/v1/chat/completions" />
 
     <label>Headers (JSON)</label>
-    <textarea id="headers" rows="4">{ "Authorization": "Bearer YOUR_API_KEY" }</textarea>
+    <textarea id="headers" rows="4" placeholder='{ "Authorization": "Bearer YOUR_API_KEY" }''></textarea>
 
     <label>Body (JSON)</label>
-    <textarea id="body" rows="6">{ "model": "gpt-3.5-turbo", "messages": [{ "role": "user", "content": "Hello" }] }</textarea>
+    <textarea id="body" rows="6" placeholder='{ "model": "gpt-3.5-turbo", "messages": [{ "role": "user", "content": "Hello" }] }'></textarea>
 
     <button id="sendBtn" onclick="sendRequest()"><img src="{{BUTTON1}}" height="14" style="vertical-align: middle; margin-right: 8px;" />Send API Request</button>
 
@@ -152,10 +152,15 @@
     <h3 style="margin-top: 30px;">🧩 Generated fetch Code</h3>
     <pre id="codeBlock" class="fade-in">// Code snippet will appear here</pre>
     <button onclick="copyCode()"><img src="{{BUTTON1}}" height="14" style="vertical-align: middle; margin-right: 8px;" />Copy</button>
-    <button onclick="sendCodeToVSCode()"><img src="{{BUTTON2}}" height="14" style="vertical-align: middle; margin-right: 8px;" />Insert to Current File</button>
+    <!-- <button onclick="sendCodeToVSCode()"><img src="{{BUTTON2}}" height="14" style="vertical-align: middle; margin-right: 8px;" />Insert to Current File</button> -->
   </div>
 
   <script>
+    
+    const LIGHT_ICON_URL = "{{LIGHT_ICON}}";
+    const DARK_ICON_URL = "{{DARK_ICON}}";
+
+
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     let darkMode = prefersDark;
 
@@ -166,9 +171,9 @@
       document.body.style.setProperty('--card-bg', darkMode ? getComputedStyle(root).getPropertyValue('--card-bg-dark') : getComputedStyle(root).getPropertyValue('--card-bg-light'));
       document.body.style.setProperty('--input-bg', darkMode ? getComputedStyle(root).getPropertyValue('--input-bg-dark') : getComputedStyle(root).getPropertyValue('--input-bg-light'));
       document.body.style.setProperty('--pre-bg', darkMode ? getComputedStyle(root).getPropertyValue('--pre-bg-dark') : getComputedStyle(root).getPropertyValue('--pre-bg-light'));
-
       const icon = document.getElementById("themeIcon");
-      icon.src = darkMode ? "{{DARK_ICON}}" : "{{LIGHT_ICON}}";
+      icon.src = darkMode ? DARK_ICON_URL : LIGHT_ICON_URL;
+
     }
 
     function toggleTheme() {

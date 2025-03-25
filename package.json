@@ -15,7 +15,8 @@
     "onLanguage:javascript",
     "onLanguage:typescript",
     "onLanguage:javascriptreact",
-    "onLanguage:typescriptreact"
+    "onLanguage:typescriptreact",
+    "onCommand:jennieapi.generateApiJson"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -25,30 +26,27 @@
         "title": "JennieAPI: Open API Connector"
       },
       {
-        "command": "jennieapi.testapiCmd",
-        "title": "JennieAPI: Test API Connection"
-      },
-      {
-        "command": "jennieapi.showApiList",
-        "title": "JennieAPI: Show API Endpoints",
-        "category": "Jennie API"
-      },
-      {
         "command": "jennieapi.suggestApiEndpoints",
         "title": "JennieAPI: Suggest API Endpoints",
         "category": "Jennie API"
+      },
+      {
+        "command": "jennieapi.generateApiJson",
+        "title": "JennieAPI: Generate API JSON from Folder"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "jennieapi.showApiList",
-          "when": "editorLangId =~ /(javascript|typescript|javascriptreact|typescriptreact)/",
-          "group": "navigation"
-        },
-        {
           "command": "jennieapi.suggestApiEndpoints",
           "when": "editorLangId =~ /(javascript|typescript|javascriptreact|typescriptreact)/",
+          "group": "navigation"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "jennieapi.generateApiJson",
+          "when": "true",
           "group": "navigation"
         }
       ]
