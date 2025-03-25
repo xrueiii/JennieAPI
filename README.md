@@ -1,4 +1,4 @@
-# Jennie API Helper – VS Code Extension 🚀
+# Jennie API – Master in APIs
 
 This VS Code extension helps developers integrate and explore backend APIs more easily by leveraging OpenAPI specifications and AI-assisted suggestions. It allows you to generate OpenAPI documentation from source code, suggest relevant API endpoints based on context, and even auto-generate and refine fetch code snippets.
 
@@ -16,8 +16,9 @@ This VS Code extension helps developers integrate and explore backend APIs more 
 ---
 
 ## 📁 Project Structure
-
+Main structure is shown below:
 ```yaml
+icon/
 src/
 ├── extension.ts               # Entry point
 ├── commands/                  # VS Code commands
@@ -34,7 +35,8 @@ src/
 ├── utils/
 │   └── file.ts                # File system utilities
 ├── types/
-│   └── index.ts               # Type definitions (OpenAPI, etc.)
+│   └── index.ts               # Type definitions 
+
 ```
 
 ---
@@ -45,7 +47,7 @@ src/
 
 ```bash
 https://github.com/xrueiii/JennieAPI.git
-cd jennie-api-helper
+cd JennieAPI
 ```
 2. **Create your .env file:** \
   Copy the example file and fill in your own values:
