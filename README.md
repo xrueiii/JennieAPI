@@ -49,10 +49,15 @@ src/
 https://github.com/xrueiii/JennieAPI.git
 cd JennieAPI
 ```
+
 2. **Create your .env file:** \
-  Copy the example file and fill in your own values:
+Please checkout to **/JennieAPI-Extension** first:
 ```bash
-  cp .env.example .env
+cd JennieAPI-Extension
+```
+Copy the example file and fill in your own values:
+```bash
+cp .env.example .env
 ```
 Then edit .env and provide your Azure OpenAI credentials:
 ```ini
@@ -62,11 +67,13 @@ AZURE_OPENAI_API_KEY=your-api-key-here
 
 ## ▶️ Run the Extension
 
-1. Open this folder in VS Code
+1. Open **JennieAPI-Extension** folder in VS Code
 
 2. Press F5 to launch the extension in a new Extension Development Host window
 
 No need to run any extra servers — everything is local.
+
+3. After you get into the extension page, open **Extension-test-web** folder, and start testing! 
 
 ## 🧪 Available Commands
 
@@ -81,7 +88,7 @@ No need to run any extra servers — everything is local.
 
 ---
 
-### 🧭 How to Use Each Command
+### 🧭 How to Use Each Command in Extension-test-web
 
 1. **Generate API JSON from Folder**  
    Right-click on your API folder in the Explorer panel, then select `JennieAPI: Generate API JSON from Folder`. This will scan your Java or TypeScript controller files and convert them into OpenAPI-compliant `api.json` documentation.
