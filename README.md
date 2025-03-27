@@ -16,7 +16,7 @@ This VS Code extension helps developers integrate and explore backend APIs more 
 ---
 
 ## 📁 Project Structure
-Main structure is shown below:
+Main structure of **JenninAPI-Extension** is shown below:
 ```yaml
 icon/
 src/
